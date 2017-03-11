@@ -20,7 +20,7 @@ module.exports = function (options) {
 
 function create (request, reply) {
   return internals.model.create(request.payload)
-    .then(user => reply({ ok: true, message: `Created user with id ${user.id}` }).code(201))
+    .then(id => reply({ ok: true, message: `Created user with id ${id}` }).code(201))
     .catch(err => reply(Boom.wrap(err)))
 }
 

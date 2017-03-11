@@ -2,6 +2,7 @@
 
 const Code = require('code')
 const Lab = require('lab')
+const Migrate = require('rethinkdb-migrate').migrate
 const Path = require('path')
 
 const lab = exports.lab = Lab.script()
@@ -11,6 +12,8 @@ const it = lab.test
 const before = lab.before
 const after = lab.after
 
+const Config = require('../../../lib/config')
+const dbConfig = require('../../../migrations/config')
 const UserModel = require('../../../api/users/model')
 const Server = require('../../../lib')
 
@@ -19,6 +22,18 @@ const internals = {}
 internals.User = require('../../../api/users/users.json')
 
 describe('User API Tests', () => {
+  const migrationConfig = Object.assign({}, dbConfig, { relativeTo: Path.resolve(__dirname, '../../../') })
+
+  before({ timeout: 10000 }, done => {
+    Migrate(Object.assign({}, migrationConfig, { op: 'up' }))
+      .then(done)
+  })
+
+  after({ timeout: 10000 }, done => {
+    Migrate(Object.assign({}, migrationConfig, { op: 'down' }))
+      .then(done)
+  })
+
   describe('List Users Tests', () => {
     it('Lists users if logged as user', done => {
       let server
@@ -106,7 +121,7 @@ describe('User API Tests', () => {
         .then(res => {
           expect(res.statusCode).to.equal(201)
           expect(res.result.ok).to.equal(true)
-          expect(res.result.message).to.match(/^Created user with id \d+$/)
+          expect(res.result.message).to.match(/^Created user with id .+$/)
 
           server.stop(done)
         })
@@ -379,7 +394,8 @@ internals.manifest = {
   registrations: [
     { plugin: { register: './lib/auth', options: { getValidatedUser: UserModel.getValidatedUser } } },
     { plugin: './api/users' },
-    { plugin: 'hapi-auth-cookie' }
+    { plugin: 'hapi-auth-cookie' },
+    { plugin: { register: './lib/db', options: Config.get('/db') } }
   ]
 }
 

@@ -23,7 +23,6 @@ internals.model = {
 module.exports = function (_di) {
   const di = _di || {}
 
-  internals.db = require('./users.json')
   Object.assign(internals, di)
 
   return {
@@ -38,18 +37,18 @@ module.exports = function (_di) {
 }
 
 function create (data) {
-  return new Promise((resolve, reject) => {
-    // check for username duplication:
-    if (internals.db.find(user => user.username === data.username)) {
-      return reject(Boom.badRequest('Username already taken'))
-    }
+  const { r } = internals
 
-    const id = internals.db[internals.db.length - 1].id + 1
-
-    const user = Object.assign({}, { id }, data)
-    internals.db.push(user)
-    resolve(user)
-  })
+  return r.table('users').filter({ username: data.username }).run()
+    .then(users => {
+      if (users.length) {
+        return Promise.reject(Boom.badRequest('Username already taken'))
+      }
+    })
+    .then(() => r.table('users').insert(data).run())
+    .then(result => {
+      return Promise.resolve(result.generated_keys[0])
+    })
 }
 
 function read (id) {

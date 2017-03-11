@@ -8,9 +8,9 @@ const internals = {}
 internals.basePath = '/api/users'
 
 exports.register = (server, options, next) => {
-  internals.handlers = Handlers(options)
+  internals.options = options
 
-  server.dependency('Auth', internals.registerRoutes)
+  server.dependency(['Auth', 'Database'], internals.registerRoutes)
   next()
 }
 
@@ -19,6 +19,9 @@ exports.register.attributes = {
 }
 
 internals.registerRoutes = function (server, next) {
+  internals.options.r = server.app.r
+  internals.handlers = Handlers(internals.options)
+
   server.route([
     {
       method: 'POST',

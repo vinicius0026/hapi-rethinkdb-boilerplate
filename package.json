@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "NODE_ENV=test lab -v -c -a code -L",
-    "coveralls": "echo repo_token: $COVERALLS_HAPI_BOILERPLATE > .coveralls.yml",
+    "coveralls": "echo repo_token: $COVERALLS_HAPI_RETHINKDB_BOILERPLATE > .coveralls.yml",
     "coverage": "NODE_ENV=test npm run coveralls && lab -c -a code -r lcov -o lcov.info && cat ./lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm ./lcov.info .coveralls.yml",
     "start": "node lib/start.js"
   },
@@ -43,6 +43,8 @@
     "inert": "^4.1.0",
     "joi": "^10.1.0",
     "lout": "^9.2.0",
+    "rethinkdb-migrate": "^1.0.2",
+    "rethinkdbdash": "^2.3.28",
     "vision": "^4.1.1"
   }
 }
