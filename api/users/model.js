@@ -96,10 +96,7 @@ function remove (id) {
 }
 
 function list () {
-  return new Promise((resolve, reject) => {
-    const users = internals.db.map(user => Object.assign({}, user, { password: undefined }))
-    resolve(users)
-  })
+  return internals.r.table('users').withFields('id', 'username', 'scope').run()
 }
 
 function getValidatedUser (username, password) {

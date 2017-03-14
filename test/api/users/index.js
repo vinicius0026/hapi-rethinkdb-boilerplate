@@ -71,7 +71,8 @@ describe('User API Tests', () => {
         ],
         registrations: [
           { plugin: { register: './lib/auth', options: { getValidatedUser: UserModel.getValidatedUser } } },
-          { plugin: { register: './api/users', options: { db: { map: () => { throw new Error() } } } } }, // forcing error in db
+          { plugin: { register: './api/users' } },
+          { plugin: { register: './lib/db', options: { db: 'hapi_rethinkdb_boilerplate_test', port: 28016, silent: true } } },
           { plugin: 'hapi-auth-cookie' }
         ]
       }
