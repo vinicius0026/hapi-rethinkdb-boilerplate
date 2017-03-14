@@ -72,16 +72,13 @@ function update (id, data) {
 }
 
 function remove (id) {
-  return new Promise((resolve, reject) => {
-    const index = internals.db.findIndex(user => user.id === Number(id))
-
-    if (index < 0) {
-      return reject(Boom.notFound('User not found'))
-    }
-
-    internals.db.splice(index, 1)
-    resolve()
-  })
+  return internals.r.table('users').get(id).delete().run()
+    .then(result => {
+      if (result.deleted === 0) {
+        return Promise.reject(Boom.notFound('User not found'))
+      }
+      return Promise.resolve()
+    })
 }
 
 function list () {

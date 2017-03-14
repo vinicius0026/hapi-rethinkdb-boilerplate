@@ -19,8 +19,6 @@ const Server = require('../../../lib')
 
 const internals = {}
 
-internals.User = require('../../../api/users/users.json')
-
 describe('User API Tests', () => {
   const migrationConfig = Object.assign({}, dbConfig, { relativeTo: Path.resolve(__dirname, '../../../') })
 
@@ -335,7 +333,7 @@ describe('User API Tests', () => {
           })
         })
         .then(res => {
-          userId = res.result.message.match(/^Created user with id (\d+)$/)[1]
+          userId = res.result.message.match(/^Created user with id (.+)$/)[1]
         })
         .then(done)
         .catch(done)
