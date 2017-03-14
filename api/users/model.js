@@ -52,17 +52,13 @@ function create (data) {
 }
 
 function read (id) {
-  return new Promise((resolve, reject) => {
-    const user = internals.db.find(user => user.id === Number(id))
-
-    if (!user) {
-      return reject(Boom.notFound('User not found'))
-    }
-
-    const returnedUser = Object.assign({}, user, { password: undefined })
-
-    resolve(returnedUser)
-  })
+  return internals.r.table('users').get(id).pluck('id', 'username', 'scope').run()
+    .catch(err => {
+      if (err.message.match(/^Cannot perform pluck on a non-object non-sequence `null`/)) {
+        return Promise.reject(Boom.notFound('User not found'))
+      }
+      throw err
+    })
 }
 
 function update (id, data) {
