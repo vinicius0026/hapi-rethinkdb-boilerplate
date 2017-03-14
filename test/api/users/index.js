@@ -250,7 +250,7 @@ describe('User API Tests', () => {
           })
         })
         .then(res => {
-          userId = res.result.message.match(/^Created user with id (\d+)$/)[1]
+          userId = res.result.message.match(/^Created user with id (.+)$/)[1]
         })
         .then(done)
         .catch(done)

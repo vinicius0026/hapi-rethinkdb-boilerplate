@@ -62,20 +62,13 @@ function read (id) {
 }
 
 function update (id, data) {
-  return new Promise((resolve, reject) => {
-    const index = internals.db.findIndex(user => user.id === Number(id))
-    const user = internals.db[index]
-
-    if (!user) {
-      return reject(Boom.notFound('User not found'))
-    }
-
-    const updatedUser = Object.assign(user, data)
-
-    internals.db[index] = updatedUser
-
-    resolve(updatedUser)
-  })
+  return internals.r.table('users').get(id).update(data, { returnChanges: true }).run()
+    .then(result => {
+      if (result.skipped === 1) {
+        return Promise.reject(Boom.notFound('User not found'))
+      }
+      return Promise.resolve(result.changes[0].new_val)
+    })
 }
 
 function remove (id) {
