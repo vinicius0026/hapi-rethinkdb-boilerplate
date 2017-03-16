@@ -9,8 +9,8 @@ const describe = lab.experiment
 const expect = Code.expect
 const it = lab.test
 
+const Config = require('../lib/config')
 const UserModel = require('../api/users/model')()
-const Users = require('../api/users/users.json')
 const Server = require('../lib')
 
 const internals = {}
@@ -22,7 +22,10 @@ describe('Request Logging', () => {
       .then(_server => {
         server = _server
 
-        const admin = Users[0]
+        const admin = {
+          username: 'admin',
+          password: 'p4$$w0Rd'
+        }
 
         server.on('request', (request, event, tags) => {
           const logData = event.data
@@ -56,7 +59,8 @@ internals.manifest = {
   registrations: [
     { plugin: { register: './lib/auth', options: { getValidatedUser: UserModel.getValidatedUser } } },
     { plugin: './lib/requestLogging' },
-    { plugin: 'hapi-auth-cookie' }
+    { plugin: 'hapi-auth-cookie' },
+    { plugin: { register: './lib/db', options: Config.get('/db') } }
   ]
 }
 

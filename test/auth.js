@@ -2,29 +2,47 @@
 
 const Code = require('code')
 const Lab = require('lab')
+const Migrate = require('rethinkdb-migrate').migrate
 const Path = require('path')
 
 const lab = exports.lab = Lab.script()
 const describe = lab.experiment
 const expect = Code.expect
 const it = lab.test
+const before = lab.before
+const after = lab.after
 
+const Config = require('../lib/config')
+const dbConfig = require('../migrations/config')
 const Server = require('../lib')
-const UserModel = require('../api/users/model')()
 
 const internals = {}
 
-internals.User = require('../api/users/users.json')
-
 describe('Auth', () => {
+  const migrationConfig = Object.assign({}, dbConfig, { relativeTo: Path.resolve(__dirname, '../') })
+  const admin = {
+    username: 'admin',
+    password: 'p4$$w0Rd',
+    scope: ['user', 'admin']
+  }
+
+  before({ timeout: 10000 }, done => {
+    Migrate(Object.assign({}, migrationConfig, { op: 'up' }))
+      .then(() => done())
+      .catch(done)
+  })
+
+  after({ timeout: 10000 }, done => {
+    Migrate(Object.assign({}, migrationConfig, { op: 'down' }))
+      .then(done)
+      .catch(done)
+  })
   it('allows user to authenticate via POST /login', done => {
     let server
 
     Server.init(internals.manifest, internals.composeOptions)
       .then(_server => {
         server = _server
-
-        const admin = internals.User[0]
 
         return server.inject({
           method: 'POST',
@@ -48,13 +66,11 @@ describe('Auth', () => {
       .then(_server => {
         server = _server
 
-        const admin = internals.User[0]
-
         return server.inject({
           method: 'POST',
           url: '/login',
           payload: {
-            username: admin.username,
+            username: 'admin',
             password: 'wrong-pass'
           }
         })
@@ -94,7 +110,10 @@ describe('Auth', () => {
       .then(_server => {
         server = _server
 
-        const admin = internals.User[0]
+        const admin = {
+          username: 'admin',
+          password: 'p4$$w0Rd'
+        }
 
         return server.inject({
           method: 'POST',
@@ -134,8 +153,10 @@ internals.manifest = {
     { port: 0 }
   ],
   registrations: [
-    { plugin: { register: './lib/auth', options: { getValidatedUser: UserModel.getValidatedUser } } },
-    { plugin: 'hapi-auth-cookie' }
+    { plugin: './lib/auth' },
+    { plugin: 'hapi-auth-cookie' },
+    { plugin: './api/users' },
+    { plugin: { register: './lib/db', options: Config.get('/db') } }
   ]
 }
 

@@ -25,11 +25,15 @@ describe('User API Tests', () => {
   before({ timeout: 10000 }, done => {
     Migrate(Object.assign({}, migrationConfig, { op: 'up' }))
       .then(done)
+      .catch(done)
   })
 
   after({ timeout: 10000 }, done => {
     Migrate(Object.assign({}, migrationConfig, { op: 'down' }))
-      .then(done)
+      .then(() => {
+        done()
+      })
+      .catch(done)
   })
 
   describe('List Users Tests', () => {
