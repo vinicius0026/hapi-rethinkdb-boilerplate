@@ -1,12 +1,6 @@
-/*
-  This is a fake implementation, with json + memory database stub, not suitable
-  for use in production. Replace this with a real database connection and
-  lookups and don't forget to secure user's passwords and to remove
-  sensitive data like salt and password hash when returning users from this file
-*/
-
 'use strict'
 
+const Bcrypt = require('bcrypt')
 const Boom = require('boom')
 const Joi = require('joi')
 
@@ -38,14 +32,20 @@ module.exports = function (_di) {
 
 function create (data) {
   const { r } = internals
+  const SALT_ROUNDS = 10
 
   return r.table('users').filter({ username: data.username }).run()
     .then(users => {
       if (users.length) {
         return Promise.reject(Boom.badRequest('Username already taken'))
       }
+      return Bcrypt.hash(data.password, SALT_ROUNDS)
     })
-    .then(() => r.table('users').insert(data).run())
+    .then(hash => {
+      delete data.password
+      const user = Object.assign({}, data, { hash })
+      return r.table('users').insert(user).run()
+    })
     .then(result => {
       return Promise.resolve(result.generated_keys[0])
     })
@@ -86,21 +86,23 @@ function list () {
 }
 
 function getValidatedUser (username, password) {
-  return new Promise((resolve, reject) => {
-    const user = internals.db.find(user => user.username === username)
+  return internals.r.table('users').filter({ username: username }).run()
+    .then(users => {
+      if (users.length === 0) {
+        return Promise.resolve()
+      }
 
-    if (!user) {
-      return resolve()
-    }
+      const user = users[0]
 
-    // Replace this for a constant time criptographic comparison of passwords
-    if (password === user.password) {
-      // removing sensitive information from user object
-      const _user = Object.assign({}, user)
-      delete _user.password
-      return resolve(user)
-    }
+      return Bcrypt.compare(password, user.hash)
+        .then(validPass => {
+          if (!validPass) {
+            return Promise.resolve()
+          }
 
-    resolve()
-  })
+          const _user = Object.assign({}, user)
+          delete _user.password
+          return Promise.resolve(user)
+        })
+    })
 }
