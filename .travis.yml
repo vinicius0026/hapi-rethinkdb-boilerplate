@@ -3,13 +3,14 @@ node_js:
   - "6"
   - "7"
 addons:
-  rethinkdb: '2.3'
   apt:
     sources:
-      - ubuntu-toolchain-r-test
-      packages:
-        - gcc-4.8
-        - g++-4.8
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+services:
+  - rethinkdb
 env:
   - TRAVIS=travis CXX=g++-4.8
 script:
