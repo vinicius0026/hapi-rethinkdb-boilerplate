@@ -15,7 +15,7 @@ addons:
     - gcc-4.8
     - g++-4.8
 before_script:
-  - rethinkdb
+  - rethinkdb &
   - sleep 20
 env:
   - TRAVIS=travis CXX=g++-4.8
