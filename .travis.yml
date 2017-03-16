@@ -9,8 +9,7 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
-services:
-  - rethinkdb
+    - rethinkdb-2.3
 env:
   - TRAVIS=travis CXX=g++-4.8
 script:
