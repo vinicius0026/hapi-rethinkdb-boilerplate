@@ -30,6 +30,7 @@
     "standard": "^8.6.0"
   },
   "dependencies": {
+    "bcrypt": "^1.0.2",
     "boom": "^4.2.0",
     "confidence": "^3.0.2",
     "dotenv": "^4.0.0",
