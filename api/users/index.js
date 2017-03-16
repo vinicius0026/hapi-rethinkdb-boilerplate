@@ -10,7 +10,7 @@ internals.basePath = '/api/users'
 exports.register = (server, options, next) => {
   internals.options = options
 
-  server.dependency(['Auth', 'Database'], internals.registerRoutes)
+  server.dependency(['Auth'], internals.registerRoutes)
   next()
 }
 
