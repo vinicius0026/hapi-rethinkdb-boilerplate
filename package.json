@@ -26,8 +26,8 @@
   "devDependencies": {
     "code": "^4.0.0",
     "coveralls": "^2.11.15",
-    "lab": "^11.2.1",
-    "standard": "^8.6.0"
+    "lab": "^13.0.1",
+    "standard": "^9.0.1"
   },
   "dependencies": {
     "bcrypt": "^1.0.2",
@@ -43,7 +43,7 @@
     "hapi-auth-cookie": "^6.1.1",
     "inert": "^4.1.0",
     "joi": "^10.1.0",
-    "lout": "^9.2.0",
+    "lout": "^10.0.0",
     "rethinkdb-migrate": "^1.0.2",
     "rethinkdbdash": "^2.3.28",
     "vision": "^4.1.1"
