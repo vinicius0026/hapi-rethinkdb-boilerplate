@@ -24,13 +24,14 @@ authentication
 [route options](https://hapijs.com/api#route-options) in Hapi API docs for
 details)
 - [Confidence](https://github.com/hapijs/confidence) for config management
-- [Crumb](https://github.com/hapijs/crumb) for CSRF prevention
 - [Joi](https://github.com/hapijs/joi) for validation
 - [Boom](https://github.com/hapijs/boom) for http error responses
 - [Good](https://github.com/hapijs/good) for logging
 - [Lout](https://github.com/hapijs/lout) (+
 [Vision](https://github.com/hapijs/vision) &
 [Inert](https://github.com/hapijs/inert)) for automatic documentation
+
+[rethinkdb-migrate](https://github.com/vinicius0026/rethinkdb-migrate) is used to manage RethinkDB migrations.
 
 
 This boilerplate has authentication and authorization setup, and user management
@@ -83,7 +84,7 @@ console.log('handlers', handlers)
 // }
 ```
 
-The handlers interact with the Model, where businness logic should be
+Handlers interact with the Model, where business logic should be
 encapsulated, such as validations (other than payload validation, which is done
 at router level), DB operations and such likes. The model file also exports a
 function which receives the options object passed to Handlers function, and
@@ -93,6 +94,41 @@ All model function return promises.
 
 The model also returns a blueprint object, used for payload validation in
 router.
+
+
+## Database
+
+RethinkDB is used as Database, with [rethinkdbdash](https://github.com/neumino/rethinkdbdash) driver.
+
+ `rethinkdbdash` is instantiated in `lib/db.js`. The instance is then stored in `server.app.r`. To use it in other plugins, add `Database` as a dependency on `register` function:
+
+```javascript
+// plugin stub
+const internals = {}
+
+exports.register = (server, options, next) => {
+  // save options, if needed
+  internals.options = options
+
+  // declare dependency on 'Database' plugin
+  server.dependency(['Database'], internals.afterLoadingDependencies)
+  next()
+}
+
+internals.afterLoadingDependencies = (server, next) {
+  // save a reference to server.app.r to be used latter
+  internals.r = server.app.r;
+
+  // register plugin behavior...
+}
+```
+
+Take a look at `api/users/index.js` and `lib/auth.js` if needed.
+
+
+## Configuration
+
+All configuration is stored in `lib/config.js`, using [Confidence](https://github.com/hapijs/confidence). Configuration for migrations is in `migrations/config.js`.
 
 ## Running locally
 
