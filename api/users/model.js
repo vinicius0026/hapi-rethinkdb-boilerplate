@@ -102,7 +102,8 @@ function getValidatedUser (username, password) {
 
           const _user = Object.assign({}, user)
           delete _user.password
-          return Promise.resolve(user)
+          delete _user.hash
+          return Promise.resolve(_user)
         })
     })
 }
