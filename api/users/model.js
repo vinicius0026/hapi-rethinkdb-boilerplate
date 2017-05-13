@@ -14,6 +14,8 @@ internals.model = {
     .description('User\'s role, used for determining what the user will be able to do in the system')
 }
 
+internals.SALT_ROUNDS = 10
+
 module.exports = function (_di) {
   const di = _di || {}
 
@@ -32,14 +34,13 @@ module.exports = function (_di) {
 
 function create (data) {
   const { r } = internals
-  const SALT_ROUNDS = 10
 
   return r.table('users').filter({ username: data.username }).run()
     .then(users => {
       if (users.length) {
         return Promise.reject(Boom.badRequest('Username already taken'))
       }
-      return Bcrypt.hash(data.password, SALT_ROUNDS)
+      return Bcrypt.hash(data.password, internals.SALT_ROUNDS)
     })
     .then(hash => {
       delete data.password
@@ -62,7 +63,19 @@ function read (id) {
 }
 
 function update (id, data) {
-  return internals.r.table('users').get(id).update(data, { returnChanges: true }).run()
+  return Promise.resolve()
+    .then(() => {
+      if (data.password) {
+        return Bcrypt.hash(data.password, internals.SALT_ROUNDS)
+          .then(hash => {
+            delete data.password
+            return Object.assign({}, data, { hash })
+          })
+      }
+
+      return data
+    })
+    .then(data => internals.r.table('users').get(id).update(data, { returnChanges: true }).run())
     .then(result => {
       if (result.skipped === 1) {
         return Promise.reject(Boom.notFound('User not found'))
