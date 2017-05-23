@@ -1,5 +1,7 @@
 'use strict'
 
+const Joi = require('joi')
+
 const User = require('./model')()
 const Handlers = require('./handlers')
 
@@ -80,6 +82,12 @@ internals.registerRoutes = function (server, next) {
         auth: {
           access: {
             scope: ['user', 'admin']
+          }
+        },
+        validate: {
+          query: {
+            limit: Joi.number().integer().min(1).max(100).default(10).description('number of items per page'),
+            page: Joi.number().integer().min(1).default(1).description('page to fetch')
           }
         },
         description: 'Lists users',

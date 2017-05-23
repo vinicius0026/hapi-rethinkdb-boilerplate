@@ -94,8 +94,19 @@ function remove (id) {
     })
 }
 
-function list () {
-  return internals.r.table('users').withFields('id', 'username', 'scope').run()
+function list ({ page, limit }) {
+  return Promise.all([
+    internals.r.table('users').count().run(),
+    internals.r.table('users').slice((page - 1) * limit, page * limit).withFields('id', 'username', 'scope').run()
+  ])
+  .then(([totalItems, data]) => ({
+    pagination: {
+      totalItems,
+      page,
+      limit
+    },
+    data
+  }))
 }
 
 function getValidatedUser (username, password) {

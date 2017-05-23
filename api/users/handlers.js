@@ -47,7 +47,7 @@ function remove (request, reply) {
 }
 
 function list (request, reply) {
-  return internals.model.list()
+  return internals.model.list(request.query)
     .then(reply)
     .catch(err => reply(Boom.wrap(err)))
 }
